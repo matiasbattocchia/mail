@@ -108,6 +108,9 @@ module Mail
       @charset = 'UTF-8'
       @defaulted_charset = true
 
+      @smtp_envelope_from = nil
+      @smtp_envelope_to = nil
+
       @perform_deliveries = true
       @raise_delivery_errors = true
 
@@ -1019,8 +1022,39 @@ module Mail
     #
     #  mail.sender = 'Mikel <mikel@test.lindsaar.net>'
     #  mail.sender #=> 'mikel@test.lindsaar.net'
+    
     def sender=( val )
       header[:sender] = val
+    end
+    
+    def smtp_envelope_from( val = nil )
+      if val
+        self.smtp_envelope_from = val
+      else
+        @smtp_envelope_from || return_path || sender || from_addrs.first
+      end
+    end
+
+    def smtp_envelope_from=( val )
+      @smtp_envelope_from = val
+    end
+
+    def smtp_envelope_to( val = nil )
+      if val
+        self.smtp_envelope_to = val
+      else
+        @smtp_envelope_to || destinations
+      end
+    end
+
+    def smtp_envelope_to=( val )
+      @smtp_envelope_to =
+        case val
+        when Array, NilClass
+          val
+        else
+          [val]
+        end
     end
 
     # Returns the decoded value of the subject field, as a single string.
